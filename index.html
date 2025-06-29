@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DwarCrafts – Where Ideas Take Form</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background: #fffefc;
+      color: #3a2d20;
+      overflow-x: hidden;
+    }
+    .dark-mode {
+      background: #1b1b1b;
+      color: #f0f0f0;
+    }
+    .handwriting {
+      font-family: 'Pacifico', cursive;
+    }
+    .header {
+      text-align: center;
+      padding: 10px 20px;
+    }
+    .logo {
+      width: 90px;
+      margin-bottom: 10px;
+    }
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .nav a {
+      text-decoration: none;
+      color: #5a3921;
+      font-weight: 600;
+    }
+    .hero {
+      padding: 60px 20px;
+      text-align: center;
+      background: linear-gradient(to right, #f8f1e7, #fffaf5);
+      background: linear-gradient(45deg, #f9f9f9, #ffe, #fcf4dc);
+    }
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      color: #6e5034;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 24px;
+      background-color: #8b5e3c;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.3s ease;
+    }
+    .btn:hover {
+      background-color: #a96c3b;
+    }
+    .features, .categories, .testimonials {
+      padding: 30px 20px;
+      text-align: center;
+    }
+    .features-list li {
+      list-style: none;
+      padding: 6px 0;
+    }
+    .category-grid {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .category-card {
+      background: #fff7ef;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      width: 120px;
+      background-image: linear-gradient(to right, #ffe8e8, #e9ffe8, #ffffe3);
+    }
+    .testimonial-carousel {
+      max-width: 600px;
+      margin: auto;
+      position: relative;
+    }
+    .testimonial {
+      display: none;
+    }
+    .testimonial.active {
+      display: block;
+      font-style: italic;
+    }
+    .footer {
+      background: #f4eade;
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+    }
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 10px 0;
+      flex-wrap: wrap;
+    }
+    .social-icons a {
+      text-decoration: none;
+      color: #5a3921;
+    }
+    .watermark {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      width: 90px;
+      opacity: 0.06;
+      z-index: -1;
+    }
+    #darkModeToggle {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 999;
+      background: #333;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .dark-mode #darkModeToggle {
+      background: #f4f4f4;
+      color: #222;
+    }
+    @media (max-width: 600px) {
+      .hero h1 {
+        font-size: 2rem;
+      }
+      .nav {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
+
+  <button id="langToggle">Swahili</button>
+  <header class="header">
+    <img src="logo.png" alt="DwarCrafts Logo" class="logo" />
+    <nav class="button"></nav>
+      <a href="index.html">Home</a> <a href="generator.html">Order</a> <a href="gallery.html">Gallery</a>  <a href="track.html">Track</a><a href="admin.html">Admin</a>
+    </nav>
+  </header>
+  <section class="hero">
+    <h1 class="handwriting">Karibu DwarCrafts</h1>
+    <p class="sw-en">From sketch to sculpture – where your vision becomes handcrafted art.</p>
+    <p class="sw-sw" style="display:none;">Kutoka mchoro hadi bidhaa – mawazo yako yanachukua umbo la kipekee hapa.</p>
+    <a href="generator.html" class="btn">Start Your Order</a>
+  </section>
+
+  <section class="features">
+    <h2 class="handwriting">Why Choose DwarCrafts?</h2>
+    <ul class="features-list">
+      <li class="sw-en">✅ Free delivery within Nairobi</li>
+      <li class="sw-sw" style="display:none;">✅ Uwasilishaji wa bure ndani ya Nairobi</li>
+      <li>✅ Fully customized furniture & décor</li>
+      <li>✅ Upload your design or use AI</li>
+      <li>✅ Fast & friendly support on WhatsApp</li>
+    </ul>
+  </section>
+
+  <section class="categories">
+    <h2 class="handwriting">View Categories</h2>
+    <div class="category-grid">
+      <div class="category-card">🛏️ Furniture</div>
+      <div class="category-card">🖼️ Wall Art</div>
+      <div class="category-card">🪑 Decor</div>
+      <div class="category-card">🎨 Customize</div>
+    </div>
+  </section>
+
+  <section class="testimonials">
+    <h2 class="handwriting">What Our Clients Say</h2>
+    <div class="testimonial-carousel">
+      <div class="testimonial active">"Absolutely stunning work! Delivered on time. Highly recommend!" – Mary K.</div>
+      <div class="testimonial">"Their AI concept preview is amazing. I got exactly what I visualized!" – Brian M.</div>
+      <div class="testimonial">"The team at DwarCrafts is creative and professional. 5 stars!" – Faith L.</div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>Contact Us:</p>
+    <div class="social-icons">
+      <a href="https://wa.me/254714129889" target="_blank">📱 WhatsApp</a>
+      <a href="https://instagram.com/dwarcrafts" target="_blank">📸 Instagram</a>
+      <a href="https://tiktok.com/@dwarcrafts" target="_blank">🎵 TikTok</a>
+      <a href="https://youtube.com/@dwarcrafts" target="_blank">📺 YouTube</a>
+      <a href="https://pinterest.com/dwarcrafts" target="_blank">📌 Pinterest</a>
+      <a href="https://twitter.com/dwarcrafts" target="_blank">🐦 Twitter</a>
+    </div>
+    <p>&copy; 2025 DwarCrafts. All rights reserved.</p>
+  </footer>
+
+  <img src="logo.png" class="watermark" alt="DwarCrafts Watermark" />
+
+  <script>
+    const testimonials = document.querySelectorAll(".testimonial");
+    let current = 0;
+    setInterval(() => {
+      testimonials[current].classList.remove("active");
+      current = (current + 1) % testimonials.length;
+      testimonials[current].classList.add("active");
+    }, 4000);
+
+    document.getElementById("langToggle").addEventListener("click", () => {
+      const engElements = document.querySelectorAll('.sw-en');
+      const swElements = document.querySelectorAll('.sw-sw');
+      const isSwahili = swElements[0].style.display === 'block';
+
+      engElements.forEach(el => el.style.display = isSwahili ? 'block' : 'none');
+      swElements.forEach(el => el.style.display = isSwahili ? 'none' : 'block');
+    });
+
+    document.getElementById("darkModeToggle").addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+    });
+  </script>
+</body>
+</html>
+

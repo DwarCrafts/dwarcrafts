@@ -1,0 +1,282 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DwarCrafts Admin Panel</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      margin-top: 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+    }
+    h1, h2 {
+      text-align: center;
+      color: #444;
+    }
+    .hidden { display: none; }
+    .order-card {
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .order-card.completed { background: #e0ffe0; }
+    .order-actions button { margin-right: 8px; }
+    .upload-section, .gallery-section { margin-top: 40px; }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .gallery-card { position: relative; }
+    .gallery-card img, .gallery-card video {
+      width: 100%;
+      border-radius: 8px;
+    }
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: red;
+      color: white;
+      border: none;
+      padding: 4px 6px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    input, button {
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    #dropZone {
+      border: 2px dashed #aaa;
+      padding: 30px;
+      text-align: center;
+      border-radius: 10px;
+      margin-top: 20px;
+      color: #777;
+    }
+    .preview-container {
+      margin-top: 10px;
+      text-align: center;
+    }
+    .pagination, .filter-controls {
+      text-align: center;
+      margin: 10px 0;
+    }
+    .filter-controls select {
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="loginForm" class="container">
+    <h2>🔐 Admin Login</h2>
+    <input type="email" id="adminEmail" placeholder="Email" value="dwarcraftsllc@gmail.com" />
+    <input type="password" id="adminPassword" placeholder="Password" value="Ajuu2025" />
+    <button onclick="adminLogin()">Login</button>
+  </div>  <div id="dashboard" class="container hidden">
+    <h1>🛠️ DwarCrafts Admin Panel</h1>
+    <div class="filter-controls">
+      <label>Filter by Type:
+        <select id="filterType">
+          <option value="all">All</option>
+          <option value="image">Images</option>
+          <option value="video">Videos</option>
+        </select>
+      </label>
+    </div><div id="orders"></div>
+
+<div class="upload-section">
+  <h2>Upload to Gallery</h2>
+  <input type="text" id="uploadTitle" placeholder="Name or description" />
+  <input type="file" id="galleryUpload" accept="image/*,video/*" />
+  <div class="preview-container">
+    <img id="previewImage" style="max-width: 100%; display:none; border-radius: 10px;" />
+  </div>
+  <button id="uploadBtn">Upload</button>
+  <div id="dropZone">Drag & Drop files here</div>
+</div>
+
+<div class="gallery-section">
+  <h2>Gallery</h2>
+  <div id="galleryGrid" class="gallery-grid"></div>
+</div>
+
+  </div>  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+    import { getFirestore, collection, getDocs, updateDoc, deleteDoc, doc, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCvZqDkc9ry9WwkT0rvK30-ZvWv_-7vmig",
+      authDomain: "dwarcrafts-firebase.firebaseapp.com",
+      projectId: "dwarcrafts-firebase",
+      storageBucket: "dwarcrafts-firebase.appspot.com",
+      messagingSenderId: "91776713343",
+      appId: "1:91776713343:web:63fab986c65c7a7800f54a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.adminLogin = async function () {
+      const email = document.getElementById("adminEmail").value;
+      const password = document.getElementById("adminPassword").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        document.getElementById("loginForm").classList.add("hidden");
+        document.getElementById("dashboard").classList.remove("hidden");
+        loadOrders();
+        loadGallery();
+      } catch (err) {
+        alert("Login failed");
+        console.error(err);
+      }
+    };
+
+    async function loadOrders() {
+      const snapshot = await getDocs(collection(db, "orders"));
+      const container = document.getElementById("orders");
+      container.innerHTML = "<h2>Orders</h2>";
+      snapshot.forEach(docSnap => {
+        const order = docSnap.data();
+        const div = document.createElement("div");
+        div.className = `order-card ${order.status === 'Completed' ? 'completed' : ''}`;
+        div.innerHTML = `
+          <strong>Tracking:</strong> ${order.trackingCode}<br>
+          <strong>Name:</strong> ${order.name}<br>
+          <strong>Phone:</strong> ${order.phone}<br>
+          <strong>Location:</strong> ${order.location}<br>
+          <strong>Status:</strong> ${order.status || 'Pending'}<br>
+          <div class="order-actions">
+            <button onclick="markComplete('${docSnap.id}')">✔️ Complete</button>
+            <button onclick="deleteOrder('${docSnap.id}')">🗑️ Delete</button>
+            <button onclick="window.print()">🖨️ Print</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    window.markComplete = async function(id) {
+      await updateDoc(doc(db, "orders", id), { status: "Completed" });
+      loadOrders();
+    };
+
+    window.deleteOrder = async function(id) {
+      if (confirm("Delete this order?")) {
+        await deleteDoc(doc(db, "orders", id));
+        loadOrders();
+      }
+    };
+
+    const uploadBtn = document.getElementById("uploadBtn");
+    const galleryUpload = document.getElementById("galleryUpload");
+    const dropZone = document.getElementById("dropZone");
+    const galleryGrid = document.getElementById("galleryGrid");
+    const previewImage = document.getElementById("previewImage");
+    const filterType = document.getElementById("filterType");
+
+    galleryUpload.addEventListener("change", () => {
+      const file = galleryUpload.files[0];
+      if (file && file.type.startsWith("image")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          previewImage.src = reader.result;
+          previewImage.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewImage.style.display = "none";
+      }
+    });
+
+    uploadBtn.addEventListener("click", () => handleUpload(galleryUpload.files[0]));
+    dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.style.background = '#e0e0e0'; });
+    dropZone.addEventListener("dragleave", () => dropZone.style.background = '');
+    dropZone.addEventListener("drop", e => {
+      e.preventDefault();
+      dropZone.style.background = '';
+      handleUpload(e.dataTransfer.files[0]);
+    });
+
+    async function handleUpload(file) {
+      const title = document.getElementById("uploadTitle").value.trim();
+      if (!file || !title) return alert("Please select a file and enter a title.");
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "dwarcrafts_uploads");
+      formData.append("tags", "dwarcrafts_gallery");
+      formData.append("folder", "dwarcrafts/gallery");
+
+      try {
+        const res = await fetch("https://api.cloudinary.com/v1_1/dpa1yap5d/auto/upload", {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        const isVideo = file.type.startsWith("video");
+        const finalUrl = data.secure_url;
+
+        await addDoc(collection(db, "projects"), {
+          title,
+          image: finalUrl,
+          type: isVideo ? "video" : "image",
+          uploadedBy: "Admin",
+          timestamp: serverTimestamp()
+        });
+
+        alert("Upload successful!");
+        previewImage.style.display = "none";
+        loadGallery();
+      } catch (err) {
+        console.error(err);
+        alert("Upload failed.");
+      }
+    }
+
+    async function loadGallery() {
+      const snapshot = await getDocs(collection(db, "projects"));
+      galleryGrid.innerHTML = "";
+      const filter = filterType.value;
+      snapshot.forEach(docSnap => {
+        const project = docSnap.data();
+        if (filter !== "all" && project.type !== filter) return;
+        const div = document.createElement("div");
+        div.className = "gallery-card";
+        div.innerHTML = project.type === "video" ?
+          `<video src="${project.image}" controls></video><button class="delete-btn" onclick="deleteGalleryItem('${docSnap.id}')">&times;</button>` :
+          `<img src="${project.image}" alt="${project.title}" /><button class="delete-btn" onclick="deleteGalleryItem('${docSnap.id}')">&times;</button>`;
+        galleryGrid.appendChild(div);
+      });
+    }
+
+    filterType.addEventListener("change", loadGallery);
+
+    window.deleteGalleryItem = async function(id) {
+      if (confirm("Delete this gallery item?")) {
+        await deleteDoc(doc(db, "projects", id));
+        loadGallery();
+      }
+    };
+  </script></body>
+</html>

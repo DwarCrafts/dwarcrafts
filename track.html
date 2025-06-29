@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Track My Order - DwarCrafts</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fdfaf7;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #5a3921;
+    }
+    .card {
+      max-width: 500px;
+      margin: 20px auto;
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #5a3921;
+      color: white;
+      font-weight: bold;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    .success {
+      color: green;
+      text-align: center;
+      margin-top: 10px;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>📦 Track My DwarCrafts Order</h1>
+  <div class="card">
+    <label for="trackCode">Enter Tracking Code</label>
+    <input type="text" id="trackCode" placeholder="e.g. DC-ABC123" />
+    <button onclick="searchOrder()">🔍 Find Order</button>
+  </div>
+
+  <div class="card hidden" id="orderCard">
+    <h2>Your Order Details</h2>
+    <label>Name</label>
+    <input type="text" id="orderName" readonly />
+
+    <label>Phone</label>
+    <input type="text" id="orderPhone" />
+
+    <label>Location</label>
+    <input type="text" id="orderLocation" />
+
+    <label>Special Instructions</label>
+    <textarea id="orderInstructions" rows="3"></textarea>
+
+    <button onclick="updateOrder()">✅ Update Order</button>
+    <p class="success" id="successMsg"></p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
+    import {
+      getFirestore, collection, getDocs, query, where, doc, updateDoc
+    } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCvZqDkc9ry9WwkT0rvK30-ZvWv_-7vmig",
+      authDomain: "dwarcrafts-firebase.firebaseapp.com",
+      projectId: "dwarcrafts-firebase",
+      storageBucket: "dwarcrafts-firebase.appspot.com",
+      messagingSenderId: "91776713343",
+      appId: "1:91776713343:web:63fab986c65c7a7800f54a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let orderDocId = null;
+    let trackingCode = "";
+
+    window.searchOrder = async () => {
+      trackingCode = document.getElementById("trackCode").value.trim().toUpperCase();
+      if (!trackingCode) return alert("Please enter a tracking code");
+
+      const q = query(collection(db, "orders"), where("trackingCode", "==", trackingCode));
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) return alert("Order not found");
+
+      const docSnap = snapshot.docs[0];
+      const order = docSnap.data();
+      orderDocId = docSnap.id;
+
+      document.getElementById("orderCard").classList.remove("hidden");
+      document.getElementById("orderName").value = order.name || "";
+      document.getElementById("orderPhone").value = order.phone || "";
+      document.getElementById("orderLocation").value = order.location || "";
+      document.getElementById("orderInstructions").value = order.instructions || "";
+    };
+
+    window.updateOrder = async () => {
+      const phone = document.getElementById("orderPhone").value.trim();
+      const location = document.getElementById("orderLocation").value.trim();
+      const instructions = document.getElementById("orderInstructions").value.trim();
+      const name = document.getElementById("orderName").value;
+
+      if (!orderDocId) return;
+
+      try {
+        await updateDoc(doc(db, "orders", orderDocId), {
+          phone, location, instructions
+        });
+
+        // Send WhatsApp update
+        const msg =
+          `✏️ *DwarCrafts Order Update*\nTracking: ${trackingCode}\n👤 ${name}\n📞 ${phone}\n📍 ${location}\n📝 ${instructions}`;
+        window.open(`https://wa.me/254714129889?text=${encodeURIComponent(msg)}`, "_blank");
+
+        document.getElementById("successMsg").textContent = "Order updated successfully!";
+      } catch (err) {
+        alert("Failed to update order.");
+        console.error(err);
+      }
+    };
+  </script>
+</body>
+</html>
