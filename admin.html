@@ -1,129 +1,218 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DwarCrafts Admin Panel</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DwarCrafts — Admin Dashboard</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f4f9;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      margin-top: 40px;
-      border-radius: 12px;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
-    }
-    h1, h2 {
-      text-align: center;
-      color: #444;
-    }
-    .hidden { display: none; }
-    .order-card {
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-    }
-    .order-card.completed { background: #e0ffe0; }
-    .order-actions button { margin-right: 8px; }
-    .upload-section, .gallery-section { margin-top: 40px; }
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-    .gallery-card { position: relative; }
-    .gallery-card img, .gallery-card video {
-      width: 100%;
-      border-radius: 8px;
-    }
-    .delete-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: red;
-      color: white;
-      border: none;
-      padding: 4px 6px;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    input, button {
-      padding: 10px;
-      margin-top: 10px;
-      width: 100%;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    #dropZone {
-      border: 2px dashed #aaa;
-      padding: 30px;
-      text-align: center;
-      border-radius: 10px;
-      margin-top: 20px;
-      color: #777;
-    }
-    .preview-container {
-      margin-top: 10px;
-      text-align: center;
-    }
-    .pagination, .filter-controls {
-      text-align: center;
-      margin: 10px 0;
-    }
-    .filter-controls select {
-      padding: 6px 12px;
-      font-size: 14px;
-    }
+    :root { --bg:#f4f6fa; --card:#fff; --muted:#666; --accent:#2e7d32; --danger:#c62828; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter, 'Segoe UI', Arial; background:var(--bg); color:#222;}
+    .wrap{max-width:1200px;margin:28px auto;padding:18px;}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+    .brand{font-weight:700;font-size:20px}
+    .auth-area input{padding:10px;margin-left:8px;border-radius:8px;border:1px solid #ccc}
+    .grid{display:grid;grid-template-columns:260px 1fr;gap:18px}
+    .panel{background:var(--card);padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(20,20,40,0.04)}
+    .sidebar .section{margin-bottom:14px}
+    .sidebar button{width:100%;padding:10px;border-radius:8px;border:0;background:#f1f3f7;text-align:left;cursor:pointer}
+    .counts{display:flex;gap:8px;margin-top:8px}
+    .count-badge{flex:1;padding:10px;background:#fff;border-radius:8px;text-align:center}
+    .upload-row{display:grid;grid-template-columns:1fr 120px;gap:10px}
+    input[type="file"]{padding:.4rem;border-radius:6px}
+    .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:12px}
+    .gallery-card{background:#fff;border-radius:8px;overflow:hidden;position:relative;border:1px solid #eee}
+    .gallery-card img, .gallery-card video{width:100%;display:block;height:140px;object-fit:cover}
+    .card-body{padding:10px;font-size:13px}
+    .small {font-size:13px;color:var(--muted)}
+    .actions{display:flex;gap:8px;margin-top:8px}
+    button.primary{background:var(--accent);color:#fff;border:0;padding:8px 10px;border-radius:8px;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid #ddd;padding:8px;border-radius:8px;cursor:pointer}
+    button.danger{background:var(--danger);color:#fff;border:0;padding:8px;border-radius:8px;cursor:pointer}
+    .orders-list{display:flex;flex-direction:column;gap:10px}
+    .order-card{padding:12px;border-radius:8px;background:#fff;border:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+    .order-info{max-width:70%}
+    .search-row{display:flex;gap:8px;margin-bottom:10px}
+    .filter-controls select, .filter-controls input{padding:8px;border-radius:8px;border:1px solid #ddd}
+    .pager{display:flex;gap:8px;justify-content:center;margin-top:10px}
+    .hidden{display:none}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center}
+    .modal{background:#fff;padding:16px;border-radius:10px;max-width:620px;width:95%}
   </style>
 </head>
 <body>
-  <div id="loginForm" class="container">
-    <h2>🔐 Admin Login</h2>
-    <input type="email" id="adminEmail" placeholder="Email" value="dwarcraftsllc@gmail.com" />
-    <input type="password" id="adminPassword" placeholder="Password" value="Ajuu2025" />
-    <button onclick="adminLogin()">Login</button>
-  </div>  <div id="dashboard" class="container hidden">
-    <h1>🛠️ DwarCrafts Admin Panel</h1>
-    <div class="filter-controls">
-      <label>Filter by Type:
-        <select id="filterType">
-          <option value="all">All</option>
-          <option value="image">Images</option>
-          <option value="video">Videos</option>
-        </select>
-      </label>
-    </div><div id="orders"></div>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">🛠️ DwarCrafts Admin</div>
+      <div class="auth-area panel" id="authPanel">
+        <span class="small">Admin sign-in</span>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="email" type="email" placeholder="admin email" style="width:240px" />
+          <input id="password" type="password" placeholder="password" style="width:180px" />
+          <button id="loginBtn" class="primary">Sign in</button>
+          <button id="logoutBtn" class="ghost hidden">Sign out</button>
+        </div>
+        <div id="authMsg" class="small" style="margin-top:8px;color:var(--muted)"></div>
+      </div>
+    </div>
 
-<div class="upload-section">
-  <h2>Upload to Gallery</h2>
-  <input type="text" id="uploadTitle" placeholder="Name or description" />
-  <input type="file" id="galleryUpload" accept="image/*,video/*" />
-  <div class="preview-container">
-    <img id="previewImage" style="max-width: 100%; display:none; border-radius: 10px;" />
+    <div id="mainArea" class="grid hidden">
+      <!-- Sidebar -->
+      <div class="sidebar panel">
+        <div class="section">
+          <strong>Views</strong>
+          <div style="margin-top:8px">
+            <button data-view="orders" class="viewBtn">Orders</button>
+            <button data-view="gallery" class="viewBtn">Gallery</button>
+            <button data-view="upload" class="viewBtn">Upload</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <strong>Live counts</strong>
+          <div class="counts">
+            <div class="count-badge"><div class="small">Pending</div><div id="countPending">0</div></div>
+            <div class="count-badge"><div class="small">Completed</div><div id="countCompleted">0</div></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <strong>Quick actions</strong>
+          <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+            <button id="refreshBtn" class="ghost">Refresh</button>
+            <button id="pushCloudBtn" class="ghost">Push selected to Cloudinary (signed)</button>
+          </div>
+        </div>
+
+        <div class="section small">
+          Note: Files are uploaded to <strong>Firebase Storage</strong> (secure). Use the server-signed Cloudinary route for CDN transforms.
+        </div>
+      </div>
+
+      <!-- Workspace -->
+      <div class="workspace panel">
+        <!-- Orders view -->
+        <div id="view-orders" class="viewPane">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h2>Orders</h2>
+            <div class="small">Realtime updates from Firestore</div>
+          </div>
+
+          <div class="search-row">
+            <input id="orderSearch" placeholder="Search by name / phone / tracking..." />
+            <select id="statusFilter">
+              <option value="all">All statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Processing">Processing</option>
+              <option value="Completed">Completed</option>
+            </select>
+            <button id="clearSearch" class="ghost">Clear</button>
+          </div>
+
+          <div id="ordersList" class="orders-list"></div>
+          <div class="pager" id="ordersPager"></div>
+        </div>
+
+        <!-- Gallery view -->
+        <div id="view-gallery" class="viewPane hidden">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h2>Gallery</h2>
+            <div class="filter-controls">
+              <select id="galleryTypeFilter">
+                <option value="all">All</option>
+                <option value="image">Images</option>
+                <option value="video">Videos</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="galleryGrid" class="gallery-grid"></div>
+        </div>
+
+        <!-- Upload view -->
+        <div id="view-upload" class="viewPane hidden">
+          <h2>Upload to Gallery (Admin only)</h2>
+          <div style="margin-top:8px" class="upload-row">
+            <input id="uploadTitle" placeholder="Title or description" />
+            <input id="uploadFile" type="file" accept="image/*,video/*" />
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button id="startUpload" class="primary">Upload to Firebase Storage</button>
+            <button id="uploadToCloudinary" class="ghost">Upload to Cloudinary (server signed)</button>
+          </div>
+
+          <div id="uploadProgress" class="small" style="margin-top:12px;color:var(--muted)"></div>
+
+          <div id="dropZone" style="margin-top:14px;padding:12px;border-radius:8px;border:2px dashed #e1e4ea;text-align:center;color:var(--muted)">
+            Drag & drop file here
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <button id="uploadBtn">Upload</button>
-  <div id="dropZone">Drag & Drop files here</div>
-</div>
 
-<div class="gallery-section">
-  <h2>Gallery</h2>
-  <div id="galleryGrid" class="gallery-grid"></div>
-</div>
+  <!-- Simple modal for confirm -->
+  <div id="confirmModal" class="hidden">
+    <div class="modal-backdrop">
+      <div class="modal panel">
+        <div id="confirmText"></div>
+        <div style="margin-top:12px;text-align:right">
+          <button id="confirmCancel" class="ghost">Cancel</button>
+          <button id="confirmOk" class="danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  </div>  <script type="module">
+  <script type="module">
+    /**************************************************************************
+     * DwarCrafts Admin v2
+     * - Firebase Auth for admin sign-in
+     * - Firestore realtime listeners for orders & projects (gallery)
+     * - Uploads go to Firebase Storage and metadata saved to Firestore
+     * - Optional Cloudinary push via a server-signed endpoint (recommended)
+     *
+     * TODO on your backend:
+     *  - Implement /api/uploadToCloudinary (POST) that accepts a Firebase storage URL or binary,
+     *    signs the upload with Cloudinary API key on server, and returns the Cloudinary URL.
+     *  - Implement /api/getSignedCloudinaryParams for direct browser-signed uploads if you prefer direct client->Cloudinary but signed.
+     *
+     * Security notes:
+     *  - Configure Firestore & Storage rules to allow only authenticated admins write/delete.
+     *  - For viewers on the public site, generate short-lived signed URLs server-side if you want to prevent hotlinking and scraping.
+     **************************************************************************/
+
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
-    import { getFirestore, collection, getDocs, updateDoc, deleteDoc, doc, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+    import {
+      getFirestore,
+      collection,
+      query,
+      orderBy,
+      onSnapshot,
+      addDoc,
+      doc,
+      updateDoc,
+      deleteDoc,
+      where,
+      limit,
+      getDocs,
+      serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+    import {
+      getStorage,
+      ref as storageRef,
+      uploadBytesResumable,
+      getDownloadURL,
+      deleteObject
+    } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js';
 
+    // ---------- CONFIG (keep your config) ----------
     const firebaseConfig = {
       apiKey: "AIzaSyCvZqDkc9ry9WwkT0rvK30-ZvWv_-7vmig",
       authDomain: "dwarcrafts-firebase.firebaseapp.com",
@@ -136,147 +225,308 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
-    window.adminLogin = async function () {
-      const email = document.getElementById("adminEmail").value;
-      const password = document.getElementById("adminPassword").value;
+    // ---------- UI refs ----------
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const emailInput = document.getElementById('email');
+    const passInput = document.getElementById('password');
+    const authMsg = document.getElementById('authMsg');
+    const mainArea = document.getElementById('mainArea');
+    const authPanel = document.getElementById('authPanel');
+
+    // sidebar view buttons
+    document.querySelectorAll('.viewBtn').forEach(b=>{
+      b.addEventListener('click', () => {
+        document.querySelectorAll('.viewPane').forEach(p=>p.classList.add('hidden'));
+        document.getElementById('view-' + b.dataset.view).classList.remove('hidden');
+      });
+    });
+
+    // page controls
+    document.getElementById('refreshBtn').addEventListener('click', ()=> {
+      // simple refresh: reload listeners (we maintain live listeners, so this is a noop)
+      authMsg.innerText = 'Refreshed live listeners';
+    });
+
+    // ---------- Auth flows ----------
+    loginBtn.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+      const password = passInput.value;
+      if(!email || !password) { authMsg.innerText = 'Enter admin email & password'; return; }
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        document.getElementById("loginForm").classList.add("hidden");
-        document.getElementById("dashboard").classList.remove("hidden");
-        loadOrders();
-        loadGallery();
+        authMsg.innerText = 'Signed in';
       } catch (err) {
-        alert("Login failed");
         console.error(err);
+        authMsg.innerText = 'Sign-in failed';
+        alert('Sign-in failed: ' + (err.message || err));
       }
-    };
+    });
 
-    async function loadOrders() {
-      const snapshot = await getDocs(collection(db, "orders"));
-      const container = document.getElementById("orders");
-      container.innerHTML = "<h2>Orders</h2>";
-      snapshot.forEach(docSnap => {
-        const order = docSnap.data();
-        const div = document.createElement("div");
-        div.className = `order-card ${order.status === 'Completed' ? 'completed' : ''}`;
-        div.innerHTML = `
-          <strong>Tracking:</strong> ${order.trackingCode}<br>
-          <strong>Name:</strong> ${order.name}<br>
-          <strong>Phone:</strong> ${order.phone}<br>
-          <strong>Location:</strong> ${order.location}<br>
-          <strong>Status:</strong> ${order.status || 'Pending'}<br>
-          <div class="order-actions">
-            <button onclick="markComplete('${docSnap.id}')">✔️ Complete</button>
-            <button onclick="deleteOrder('${docSnap.id}')">🗑️ Delete</button>
-            <button onclick="window.print()">🖨️ Print</button>
-          </div>
-        `;
-        container.appendChild(div);
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+    });
+
+    // track auth state
+    onAuthStateChanged(auth, user => {
+      if(user) {
+        authPanel.classList.add('hidden');
+        mainArea.classList.remove('hidden');
+        document.getElementById('mainArea').classList.remove('hidden');
+        logoutBtn.classList.remove('hidden');
+        listenOrders();
+        listenGallery();
+      } else {
+        authPanel.classList.remove('hidden');
+        mainArea.classList.add('hidden');
+        logoutBtn.classList.add('hidden');
+        authMsg.innerText = 'Signed out';
+        // detach listeners? (for simplicity we will rely on onSnapshot unsubscribes in implementation)
+      }
+    });
+
+    // ---------- Orders (Realtime) ----------
+    let ordersUnsub = null;
+    function listenOrders() {
+      // unsubscribe previous
+      if(ordersUnsub) ordersUnsub();
+
+      const q = query(collection(db, 'orders'), orderBy('timestamp','desc'));
+      ordersUnsub = onSnapshot(q, snapshot => {
+        const list = document.getElementById('ordersList');
+        list.innerHTML = '';
+        let pending=0, completed=0;
+        snapshot.forEach(docSnap => {
+          const d = docSnap.data();
+          const id = docSnap.id;
+          // counts
+          if(d.status === 'Completed') completed++; else pending++;
+
+          const card = document.createElement('div');
+          card.className = 'order-card';
+          card.innerHTML = `
+            <div class="order-info">
+              <div><strong>${d.name || '—'}</strong> <span class="small">(${d.phone || '—'})</span></div>
+              <div class="small">Tracking: ${d.trackingCode || '—'} • ${d.location || '—'}</div>
+              <div class="small">Items: ${d.items ? d.items.length : 1} • Status: ${d.status || 'Pending'}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small">${d.timestamp ? new Date(d.timestamp.toMillis()).toLocaleString() : ''}</div>
+              <div class="actions">
+                <button class="ghost" onclick="openOrderDetails('${id}')">View</button>
+                <button class="primary" onclick="markComplete('${id}')">Mark Complete</button>
+                <button class="danger" onclick="confirmDeleteOrder('${id}')">Delete</button>
+              </div>
+            </div>
+          `;
+          list.appendChild(card);
+        });
+
+        document.getElementById('countPending').innerText = pending;
+        document.getElementById('countCompleted').innerText = completed;
       });
     }
 
+    // exposed functions for order actions
     window.markComplete = async function(id) {
-      await updateDoc(doc(db, "orders", id), { status: "Completed" });
-      loadOrders();
+      await updateDoc(doc(db, 'orders', id), { status: 'Completed' });
     };
 
-    window.deleteOrder = async function(id) {
-      if (confirm("Delete this order?")) {
-        await deleteDoc(doc(db, "orders", id));
-        loadOrders();
-      }
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmText = document.getElementById('confirmText');
+    const confirmOk = document.getElementById('confirmOk');
+    const confirmCancel = document.getElementById('confirmCancel');
+
+    window.confirmDeleteOrder = function(id) {
+      confirmText.innerText = 'Delete this order permanently?';
+      confirmModal.classList.remove('hidden');
+      confirmOk.onclick = async () => {
+        await deleteDoc(doc(db,'orders',id));
+        confirmModal.classList.add('hidden');
+      };
+      confirmCancel.onclick = () => confirmModal.classList.add('hidden');
     };
 
-    const uploadBtn = document.getElementById("uploadBtn");
-    const galleryUpload = document.getElementById("galleryUpload");
-    const dropZone = document.getElementById("dropZone");
-    const galleryGrid = document.getElementById("galleryGrid");
-    const previewImage = document.getElementById("previewImage");
-    const filterType = document.getElementById("filterType");
+    window.openOrderDetails = function(id) {
+      // open a simple details modal or navigate to detailed admin page
+      alert('Open details for order: ' + id + ' (implement details view)');
+    };
 
-    galleryUpload.addEventListener("change", () => {
-      const file = galleryUpload.files[0];
-      if (file && file.type.startsWith("image")) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          previewImage.src = reader.result;
-          previewImage.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-      } else {
-        previewImage.style.display = "none";
-      }
-    });
-
-    uploadBtn.addEventListener("click", () => handleUpload(galleryUpload.files[0]));
-    dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.style.background = '#e0e0e0'; });
-    dropZone.addEventListener("dragleave", () => dropZone.style.background = '');
-    dropZone.addEventListener("drop", e => {
-      e.preventDefault();
-      dropZone.style.background = '';
-      handleUpload(e.dataTransfer.files[0]);
-    });
-
-    async function handleUpload(file) {
-      const title = document.getElementById("uploadTitle").value.trim();
-      if (!file || !title) return alert("Please select a file and enter a title.");
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "dwarcrafts_uploads");
-      formData.append("tags", "dwarcrafts_gallery");
-      formData.append("folder", "dwarcrafts/gallery");
-
-      try {
-        const res = await fetch("https://api.cloudinary.com/v1_1/dpa1yap5d/auto/upload", {
-          method: "POST",
-          body: formData
+    // ---------- Gallery (Realtime) ----------
+    let galleryUnsub = null;
+    function listenGallery() {
+      if(galleryUnsub) galleryUnsub();
+      const q = query(collection(db, 'projects'), orderBy('timestamp','desc'));
+      galleryUnsub = onSnapshot(q, snapshot => {
+        const grid = document.getElementById('galleryGrid');
+        grid.innerHTML = '';
+        const filter = document.getElementById('galleryTypeFilter').value;
+        snapshot.forEach(docSnap => {
+          const d = docSnap.data();
+          if(filter !== 'all' && d.type !== filter) return;
+          const card = document.createElement('div');
+          card.className = 'gallery-card';
+          const body = document.createElement('div');
+          body.className = 'card-body';
+          // content
+          if(d.type === 'video') {
+            card.innerHTML = `<video src="${d.image}" controls></video>`;
+          } else {
+            card.innerHTML = `<img src="${d.image}" alt="${d.title || ''}" />`;
+          }
+          body.innerHTML = `<div><strong>${d.title||''}</strong></div><div class="small">By: ${d.uploadedBy||'Admin'}</div>`;
+          const actions = document.createElement('div');
+          actions.className = 'actions';
+          const delBtn = document.createElement('button');
+          delBtn.className = 'danger';
+          delBtn.innerText = 'Delete';
+          delBtn.onclick = () => confirmDeleteGallery(docSnap.id, d.path || null, d.image || null);
+          const pushBtn = document.createElement('button');
+          pushBtn.className = 'ghost';
+          pushBtn.innerText = 'Push → Cloudinary';
+          pushBtn.onclick = () => pushToCloudinary(docSnap.id, d.image || null);
+          actions.appendChild(pushBtn);
+          actions.appendChild(delBtn);
+          body.appendChild(actions);
+          card.appendChild(body);
+          grid.appendChild(card);
         });
-        const data = await res.json();
-        const isVideo = file.type.startsWith("video");
-        const finalUrl = data.secure_url;
+      });
+    }
 
-        await addDoc(collection(db, "projects"), {
+    async function confirmDeleteGallery(id, storagePath, publicUrl) {
+      confirmText.innerText = 'Delete this gallery item and remove its file?';
+      confirmModal.classList.remove('hidden');
+      confirmOk.onclick = async () => {
+        // Remove Firestore doc
+        await deleteDoc(doc(db,'projects',id));
+        // Optionally remove file in Firebase Storage (if we saved path)
+        if(storagePath) {
+          try { await deleteObject(storageRef(storage, storagePath)); } catch(e){ console.warn('delete storage file failed', e); }
+        }
+        confirmModal.classList.add('hidden');
+      };
+      confirmCancel.onclick = () => confirmModal.classList.add('hidden');
+    }
+
+    // ---------- Upload (Firebase Storage) ----------
+    const uploadFile = document.getElementById('uploadFile');
+    const uploadTitle = document.getElementById('uploadTitle');
+    const startUpload = document.getElementById('startUpload');
+    const uploadToCloudinaryBtn = document.getElementById('uploadToCloudinary');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const dropZone = document.getElementById('dropZone');
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.background='#eef'; });
+    dropZone.addEventListener('dragleave', e => { dropZone.style.background=''; });
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.style.background='';
+      if(e.dataTransfer.files && e.dataTransfer.files[0]) uploadFile.files = e.dataTransfer.files;
+    });
+
+    startUpload.addEventListener('click', async () => {
+      const file = uploadFile.files[0];
+      const title = uploadTitle.value.trim();
+      if(!file || !title) return alert('Choose file and title');
+
+      // create a secure path: projects/{adminUid}/{timestamp}_{filename}
+      const uid = auth.currentUser.uid;
+      const timestamp = Date.now();
+      const extension = file.name.split('.').pop();
+      const path = `projects/${uid}/${timestamp}.${extension}`;
+      const sRef = storageRef(storage, path);
+      const uploadTask = uploadBytesResumable(sRef, file);
+
+      uploadProgress.innerText = 'Uploading... 0%';
+      uploadTask.on('state_changed', (snapshot) => {
+        const pct = Math.round( (snapshot.bytesTransferred / snapshot.totalBytes) * 100 );
+        uploadProgress.innerText = `Uploading... ${pct}%`;
+      }, (err) => {
+        console.error(err);
+        uploadProgress.innerText = 'Upload failed';
+      }, async () => {
+        const downloadUrl = await getDownloadURL(sRef);
+        // Save metadata to Firestore
+        await addDoc(collection(db, 'projects'), {
           title,
-          image: finalUrl,
-          type: isVideo ? "video" : "image",
-          uploadedBy: "Admin",
+          image: downloadUrl,
+          path,                // storage path for deletion if needed
+          type: file.type.startsWith('video') ? 'video' : 'image',
+          uploadedBy: auth.currentUser.email || auth.currentUser.uid,
           timestamp: serverTimestamp()
         });
+        uploadProgress.innerText = 'Upload complete';
+        uploadTitle.value = '';
+        uploadFile.value = '';
+      });
+    });
 
-        alert("Upload successful!");
-        previewImage.style.display = "none";
-        loadGallery();
+    // If you want to upload directly to Cloudinary from client:
+    // we recommend calling your server to get signed params so you're not exposing Cloudinary API secret.
+    uploadToCloudinaryBtn.addEventListener('click', async () => {
+      const file = uploadFile.files[0];
+      const title = uploadTitle.value.trim();
+      if(!file || !title) return alert('Choose file and title');
+
+      // TODO: call backend signed endpoint
+      alert('This will call your backend to sign and upload the file to Cloudinary. Implement /api/uploadToCloudinary on your server.');
+      // Example:
+      // const form = new FormData();
+      // form.append('file', file);
+      // form.append('title', title);
+      // const r = await fetch('/api/uploadToCloudinary', { method:'POST', body: form });
+      // const data = await r.json();
+      // then save data.secure_url into Firestore similar to Firebase flow above.
+    });
+
+    // ---------- Push single gallery item to Cloudinary (server side) ----------
+    async function pushToCloudinary(docId, publicUrl) {
+      if(!publicUrl) return alert('No public URL to push');
+      if(!confirm('Push this file to Cloudinary (server will fetch and sign upload)?')) return;
+      try {
+        // POST to backend with the public URL (or with a Firebase storage path). Backend signs Cloudinary upload.
+        // NOTE: implement POST /api/pushToCloudinary { url: publicUrl } on your server.
+        const res = await fetch('/api/pushToCloudinary', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify({ url: publicUrl, docId })
+        });
+        if(!res.ok) throw new Error('push failed');
+        const json = await res.json();
+        alert('Pushed. Cloudinary URL: ' + (json.secure_url || 'returned'));
+        // Optionally update Firestore doc with cloudinaryUrl
+        await updateDoc(doc(db,'projects',docId), { cloudinaryUrl: json.secure_url || null });
       } catch (err) {
         console.error(err);
-        alert("Upload failed.");
+        alert('Push failed. See console.');
       }
     }
 
-    async function loadGallery() {
-      const snapshot = await getDocs(collection(db, "projects"));
-      galleryGrid.innerHTML = "";
-      const filter = filterType.value;
-      snapshot.forEach(docSnap => {
-        const project = docSnap.data();
-        if (filter !== "all" && project.type !== filter) return;
-        const div = document.createElement("div");
-        div.className = "gallery-card";
-        div.innerHTML = project.type === "video" ?
-          `<video src="${project.image}" controls></video><button class="delete-btn" onclick="deleteGalleryItem('${docSnap.id}')">&times;</button>` :
-          `<img src="${project.image}" alt="${project.title}" /><button class="delete-btn" onclick="deleteGalleryItem('${docSnap.id}')">&times;</button>`;
-        galleryGrid.appendChild(div);
-      });
-    }
+    // ---------- Gallery filter ----------
+    document.getElementById('galleryTypeFilter').addEventListener('change', () => {
+      // reload listener will auto-filter (we check value when rendering)
+      listenGallery();
+    });
 
-    filterType.addEventListener("change", loadGallery);
+    // ---------- Simple search & filter for orders (client-side) ----------
+    const orderSearch = document.getElementById('orderSearch');
+    const statusFilter = document.getElementById('statusFilter');
+    document.getElementById('clearSearch').addEventListener('click', ()=>{ orderSearch.value=''; statusFilter.value='all'; listenOrders(); });
 
-    window.deleteGalleryItem = async function(id) {
-      if (confirm("Delete this gallery item?")) {
-        await deleteDoc(doc(db, "projects", id));
-        loadGallery();
-      }
-    };
-  </script></body>
+    // NOTES:
+    // 1) For public site to access images securely without exposing them long-term:
+    //    - Option A: serve images publicly but use Cloudinary for CDN & transformations (server-signed). This leaves images public though.
+    //    - Option B (recommended): keep files in Firebase Storage private and create a backend endpoint that generates short-lived signed URLs for the public site when needed (e.g., /api/getImage?path=projects/...). Signed URLs expire quickly and reduce scraping.
+    // 2) Add Firebase Storage & Firestore security rules so only authenticated admin accounts can write/delete.
+    // 3) On your server implement Cloudinary signed uploads / fetch-from-url flow and never store API secret client-side.
+
+    // ---------- Helpful debug expose ----------
+    window._DEBUG = { auth, db, storage };
+
+    // End of module
+  </script>
+</body>
 </html>
